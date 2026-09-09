@@ -5,6 +5,7 @@ const Listing=require("./models/listing.js");
 const  mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
+const wrapasync=require("./utils/wrapasync.js");
 main().then(()=>{
     console.log("connected to db");
 }).catch(err=>{
@@ -49,12 +50,12 @@ app.get("/listings/:id",async(req,res)=>{
     res.render("listings/show.ejs",{listing:foundListing});
 });
 
-app.post("/listings",async (req,res)=>{
-    const newlisting=new Listing(req.body.listing);
-    await newlisting.save();
+app.post("/listings",wrapasync(async(req,res,next)=>{
+    const newListing=new Listing(req,body.listing);
+    await newListing.save();
     res.redirect("/listings");
-});
-
+})
+);
 app.get("/listings/:id/edit",async (req,res)=>{
     const foundListing=await Listing.findById(req.params.id);
     if(!foundListing){
