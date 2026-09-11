@@ -2,6 +2,8 @@ const express=require("express");
 const app=express();
 const mongoose=require("mongoose");
 const Listing=require("./models/listing.js");
+const wrapasync = require("./utils/wrapasync.js");
+const expresserror = require("./utils/expresserror.js");
 const  mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
@@ -102,7 +104,9 @@ app.use((err,req,res,next)=>{
     console.error(err);
     res.status(500).send("Something went wrong on the server.");
 });
-
+app.all("*",(req,res,next){
+    next(new expresserror(404,"Page not found!"));
+})
 app.listen(8080,()=>{
     console.log("server is running");
 });
