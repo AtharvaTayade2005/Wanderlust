@@ -8,6 +8,7 @@ const  mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
 const wrapasync=require("./utils/wrapasync.js");
+const {schema}=require("./schema.js");
 main().then(()=>{
     console.log("connected to db");
 }).catch(err=>{
@@ -51,22 +52,34 @@ app.get("/listings/:id",async(req,res)=>{
     }
     res.render("listings/show.ejs",{listing:foundListing});
 });
+const validatelisting=(req,res,next)=>{
+    let {error}=schema.validate(req.body);
+    console.log(result);
+    if(error){
+        let errmsg=error.details.map((el)=>el.message).join(",");
+        throw new expresserror(400,errmsg);
+    }
+    else{
+        next();
+    }
+}
 
-app.post("/listings",wrapasync(async(req,res,next)=>{
+app.post("/listings",validatelisting,wrapasync(async(req,res,next)=>{
     const newListing=new Listing(req,body.listing);
     await newListing.save();
     res.redirect("/listings");
 })
 );
-app.get("/listings/:id/edit",async (req,res)=>{
+
+app.get("/listings/:id/edit",wrapasync(async (req,res)=>{
     const foundListing=await Listing.findById(req.params.id);
     if(!foundListing){
         return res.status(404).send("Listing not found");
     }
     res.render("listings/edit.ejs",{listing:foundListing});
-});
+}));
 
-app.put("/listings/:id",async (req,res)=>{
+app.put("/listings/:id",wrapasync(async (req,res)=>{
     const updatedListing=await Listing.findByIdAndUpdate(
         req.params.id,
         req.body.listing,
@@ -76,7 +89,7 @@ app.put("/listings/:id",async (req,res)=>{
         return res.status(404).send("Listing not found");
     }
     res.redirect(`/listings/${updatedListing._id}`);
-});
+}));
 
 app.delete("/listings/:id",async (req,res)=>{
     const deletedListing=await Listing.findByIdAndDelete(req.params.id);
@@ -102,11 +115,12 @@ app.get("/testlisting",async (req,res)=>{
 
 app.use((err,req,res,next)=>{
     console.error(err);
-    res.status(500).send("Something went wrong on the server.");
+    res.status(statusCode).render("error.ejs",{message});
+    //res.status(500).send("Something went wrong on the server.");
 });
-app.all("*",(req,res,next){
+app.all("*",(req,res,next)=>{
     next(new expresserror(404,"Page not found!"));
-})
+});
 app.listen(8080,()=>{
     console.log("server is running");
 });
