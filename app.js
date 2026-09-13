@@ -2,13 +2,12 @@ const express=require("express");
 const app=express();
 const mongoose=require("mongoose");
 const Listing=require("./models/listing.js");
-const wrapasync = require("./utils/wrapasync.js");
-const expresserror = require("./utils/expresserror.js");
+const wrapasync=require("./utils/wrapasync.js");
+const expresserror=require("./utils/expresserror.js");
+const {listingSchema: schema}=require("./schema.js");
 const  mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
-const wrapasync=require("./utils/wrapasync.js");
-const {schema}=require("./schema.js");
 main().then(()=>{
     console.log("connected to db");
 }).catch(err=>{
@@ -54,7 +53,6 @@ app.get("/listings/:id",async(req,res)=>{
 });
 const validatelisting=(req,res,next)=>{
     let {error}=schema.validate(req.body);
-    console.log(result);
     if(error){
         let errmsg=error.details.map((el)=>el.message).join(",");
         throw new expresserror(400,errmsg);
@@ -65,7 +63,7 @@ const validatelisting=(req,res,next)=>{
 }
 
 app.post("/listings",validatelisting,wrapasync(async(req,res,next)=>{
-    const newListing=new Listing(req,body.listing);
+    const newListing=new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
 })
@@ -115,10 +113,9 @@ app.get("/testlisting",async (req,res)=>{
 
 app.use((err,req,res,next)=>{
     console.error(err);
-    res.status(statusCode).render("error.ejs",{message});
-    //res.status(500).send("Something went wrong on the server.");
+    res.status(err.statusCode||500).render("listings/error.ejs",{err});
 });
-app.all("*",(req,res,next)=>{
+app.use((req,res,next)=>{
     next(new expresserror(404,"Page not found!"));
 });
 app.listen(8080,()=>{

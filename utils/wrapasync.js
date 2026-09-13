@@ -4,4 +4,4 @@ function wrapasync(fn){
     }
 }
 
-module.exports = wrapasync;
+module.exports=wrapasync;
