@@ -1,5 +1,5 @@
 const mongoose=require("mongoose");
-const Schema=mongoose.Schema({
+const Schema=new mongoose.Schema({
     comment:String,
     rating:{
         type:Number,
@@ -8,7 +8,7 @@ const Schema=mongoose.Schema({
     },
     createdat:{
         type:Date,
-        default:Date.now(),
+        default:Date.now
     }
 });
-module.exports=mongoose.model("Review",reviewschema);
+module.exports=mongoose.model("Review",Schema);
