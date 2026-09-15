@@ -9,6 +9,8 @@ const  mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
 const review=require("./models/review.js");
+const listings=require("./routes/listing.js");
+const Review=require("./routes/review.js");
 main().then(()=>{
     console.log("connected to db");
 }).catch(err=>{
@@ -17,7 +19,8 @@ main().then(()=>{
 async function main(){
     await mongoose.connect(mongo_url);
 }
-
+app.use("/listings",listings);
+app.use("/listings/:id/reviews",Review);
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({extended:true}));
@@ -37,93 +40,7 @@ app.use((req,res,next)=>{
 app.get("/",(req,res)=>{
     res.redirect("/listings");
 });
-app.get("/listings",async (req,res)=>{
-    const allListings=await Listing.find({});
-    res.render("listings/index.ejs",{allListings});
-});
-app.get("/listings/new",(req,res)=>{
-    res.render("listings/new.ejs");
-});
-app.get("/listings/:id",async(req,res)=>{
-    let{id}=req.params;
-    const foundListing=await Listing.findById(id).populate("reviews");
-    if(!foundListing){
-        return res.status(404).send("Listing not found");
-    }
-    res.render("listings/show.ejs",{listing:foundListing});
-});
-const validatelisting=(req,res,next)=>{
-    let {error}=schema.validate(req.body);
-    if(error){
-        let errmsg=error.details.map((el)=>el.message).join(",");
-        throw new expresserror(400,errmsg);
-    }
-    else{
-        next();
-    }
-}
-const validatereview=(req,res,next)=>{
-    let {error}=reviewschema.validate(req.body);
-    if(error){
-        let errmsg=error.details.map((el)=>el.message).join(",");
-        throw new expresserror(400,errmsg);
-    }
-    else{
-        next();
-    }
-}
-
-app.post("/listings",validatelisting,wrapasync(async(req,res,next)=>{
-    const newListing=new Listing(req.body.listing);
-    await newListing.save();
-    res.redirect("/listings");
-})
-);
-
-app.get("/listings/:id/edit",wrapasync(async (req,res)=>{
-    const foundListing=await Listing.findById(req.params.id);
-    if(!foundListing){
-        return res.status(404).send("Listing not found");
-    }
-    res.render("listings/edit.ejs",{listing:foundListing});
-}));
-
-app.put("/listings/:id",wrapasync(async (req,res)=>{
-    const updatedListing=await Listing.findByIdAndUpdate(
-        req.params.id,
-        req.body.listing,
-        {runValidators:true,new:true}
-    );
-    if(!updatedListing){
-        return res.status(404).send("Listing not found");
-    }
-    res.redirect(`/listings/${updatedListing._id}`);
-}));
-
-app.delete("/listings/:id",async (req,res)=>{
-    const deletedListing=await Listing.findByIdAndDelete(req.params.id);
-    if(!deletedListing){
-        return res.status(404).send("Listing not found");
-    }
-    res.redirect("/listings");
-});
 //reviews
-app.post("/listings/:id/reviews",validatereview,wrapasync(async(req,res)=>{
-    let listing= await Listing.findById(req.params.id);
-    let newreview=new review(req.body.review);
-    listing.reviews.push(newreview);
-    await newreview.save();
-    await listing.save();
-    res.redirect(`/listings/${listing._id}`);
-}));
-//delete route
-app.delete("/listings/:id/reviews/:reviewid",wrapasync(async(req,res)=>{
-    let{id,reviewid}=req.params;
-    await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewid}});
-    await review.findByIdAndDelete(reviewid);
-
-    res.redirect(`listings/${id}`);
-}))
 
 app.get("/testlisting",async (req,res)=>{
     let samplelisting=new Listing({
