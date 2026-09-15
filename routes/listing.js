@@ -21,6 +21,7 @@ router.get("/",async (req,res)=>{
 router.post("/",validatelisting,wrapasync(async(req,res,next)=>{
     const newListing=new Listing(req.body.listing);
     await newListing.save();
+    req.flash("success","New Listing Created");
     res.redirect("/listings");
 }));
 
@@ -31,14 +32,18 @@ router.get("/:id",async(req,res)=>{
     let{id}=req.params;
     const foundListing=await Listing.findById(id).populate("reviews");
     if(!foundListing){
-        return res.status(404).send("Listing not found");
+    req.flash("error","Listing you requested for does not exist");
+    res.redirect("/listings");
+    return res.status(404).send("Listing not found");
     }
     res.render("listings/show.ejs",{listing:foundListing});
 });
 router.get("/:id/edit",wrapasync(async (req,res)=>{
     const foundListing=await Listing.findById(req.params.id);
     if(!foundListing){
-        return res.status(404).send("Listing not found");
+    req.flash("error","Listing you requested for does not exist");
+    res.redirect("/listings");
+    return res.status(404).send("Listing not found");
     }
     res.render("listings/edit.ejs",{listing:foundListing});
 }));
@@ -53,6 +58,7 @@ router.put("/:id",wrapasync(async (req,res)=>{
         return res.status(404).send("Listing not found");
     }
     res.redirect(`/listings/${updatedListing._id}`);
+     req.flash("success","Review Updated !");
 }));
 
 router.delete("/:id",async (req,res)=>{
