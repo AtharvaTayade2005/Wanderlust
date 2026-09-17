@@ -9,25 +9,14 @@ const  mongo_url="mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
 const review=require("./models/review.js");
-const listings=require("./routes/listing.js");
-const Review=require("./routes/review.js");
+const listingRouter=require("./routes/listing.js");
+const ReviewRouter=require("./routes/review.js");
 const session=require("express-session");
 const flash=require("connect-flash");
-main().then(()=>{
-    console.log("connected to db");
-}).catch(err=>{
-    console.log(err);
-});
-async function main(){
-    await mongoose.connect(mongo_url);
-}
-app.use("/listings",listings);
-app.use("/listings/:id/reviews",Review);
-app.set("view engine","ejs");
-app.set("views",path.join(__dirname,"views"));
-app.use(express.urlencoded({extended:true}));
-app.engine('ejs',ejsmate);
-app.use(express.static(path.join(__dirname,"/public")));
+const passport=require("passport");
+const localStrategy=require("passport-local");
+const User=require("./models/user.js");
+const userRouter=require("./routes/user.js");
 const sessionOptions={
     secret:"mysecretcode",
     resave:false,
@@ -38,14 +27,48 @@ const sessionOptions={
         httpOnly:true,
     },
 };
+main().then(()=>{
+    console.log("connected to db");
+}).catch(err=>{
+    console.log(err);
+});
+async function main(){
+    await mongoose.connect(mongo_url);
+}
+
+app.set("view engine","ejs");
+app.set("views",path.join(__dirname,"views"));
+app.use(express.urlencoded({extended:true}));
+app.engine('ejs',ejsmate);
+app.use(express.static(path.join(__dirname,"/public")));
 app.use(session(sessionOptions));
 app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
-    console.log(success);
     next();
 });
+
+app.use("/",userRouter);
+app.use("/listings",listingRouter);
+app.use("/listings/:id/reviews",ReviewRouter);
+
+app.get("/demouser",async(req,res)=>{
+
+    let fakeuser=new User({
+        email:"student@gmail.com",
+        username:"delta-student",
+    });
+    let registereduser=await User.register(fakeuser,"helloworld");
+    res.send(registereduser);
+
+})
 // HTML forms only support GET and POST. This lets forms use
 // ?_method=PUT and ?_method=DELETE for RESTful update/delete routes.
 app.use((req,res,next)=>{
