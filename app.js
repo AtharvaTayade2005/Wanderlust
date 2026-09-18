@@ -99,15 +99,16 @@ app.get("/testlisting",async (req,res)=>{
     res.send("sucessful testing");
 });
 
-app.use((err,req,res,next)=>{
-    console.error(err);
-    res.status(err.statusCode||500).render("listings/error.ejs",{err});
-});
 app.get("/favicon.ico",(req,res)=>{
     res.status(204).end();
 });
 app.use((req,res,next)=>{
+    console.error(`404 not found: ${req.method} ${req.originalUrl}`);
     next(new expresserror(404,"Page not found!"));
+});
+app.use((err,req,res,next)=>{
+    console.error(err);
+    res.status(err.statusCode||500).render("listings/error.ejs",{err});
 });
 app.listen(8080,()=>{
     console.log("server is running");
