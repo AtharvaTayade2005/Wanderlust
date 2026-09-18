@@ -1,5 +1,33 @@
 <% layout("/layouts/boilerplate") %>
 
+<form method="GET" action="/listings" class="row g-2 align-items-end mt-3 mb-3">
+    <div class="col-md-4">
+        <label for="q" class="form-label small text-muted mb-1"><%= t("search") %></label>
+        <input type="search" id="q" name="q" value="<%= q || '' %>" class="form-control" placeholder="<%= t('searchPlaceholder') %>">
+    </div>
+    <div class="col-md-2">
+        <label for="minPrice" class="form-label small text-muted mb-1"><%= t("minPrice") %></label>
+        <input type="number" id="minPrice" name="minPrice" value="<%= minPrice || '' %>" class="form-control" placeholder="0" min="0">
+    </div>
+    <div class="col-md-2">
+        <label for="maxPrice" class="form-label small text-muted mb-1"><%= t("maxPrice") %></label>
+        <input type="number" id="maxPrice" name="maxPrice" value="<%= maxPrice || '' %>" class="form-control" placeholder="Any" min="0">
+    </div>
+    <div class="col-md-2">
+        <label for="sort" class="form-label small text-muted mb-1"><%= t("sortBy") %></label>
+        <select id="sort" name="sort" class="form-select">
+            <option value="" <%= !sort ? 'selected' : '' %>><%= t("recommended") %></option>
+            <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>><%= t("priceLowHigh") %></option>
+            <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>><%= t("priceHighLow") %></option>
+            <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>><%= t("newest") %></option>
+            <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>><%= t("oldest") %></option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-dark w-100"><%= t("search") %></button>
+    </div>
+</form>
+
 <div class="row mt-3">
     <% allListings.forEach(listing => { %>
         <div class="col-md-4 mb-4">
@@ -12,8 +40,8 @@
                     <p class="card-text text-muted"><%= listing.location %>, <%= listing.country %></p>
                     <p class="card-text text-muted small">Listed by: <%= listing.owner?.username || 'Unknown' %></p>
                 </div>
-                <div class="card-footer bg-white border-0">
-                    <a href="/listings/<%= listing._id %>" class="btn btn-dark w-100">View Details</a>
+                <div class="card-footer bg-body border-0">
+                    <a href="/listings/<%= listing._id %>" class="btn btn-dark w-100"><%= t("viewDetails") %></a>
                 </div>
             </div>
         </div>
@@ -22,7 +50,7 @@
 
 <% if (allListings.length === 0) { %>
     <div class="text-center mt-5">
-        <h3>No listings found</h3>
-        <a href="/listings/new" class="btn btn-dark mt-3">Add your first listing</a>
+        <h3><%= t("noListingsFound") %></h3>
+        <a href="/listings/new" class="btn btn-dark mt-3"><%= t("addYourFirst") %></a>
     </div>
 <% } %>

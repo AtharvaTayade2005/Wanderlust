@@ -1,0 +1,40 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4">
+    <h4 class="mb-3"><i class="fa-solid fa-heart text-danger"></i> <%= t("saved") %></h4>
+    <% if(wishlist.length === 0){ %>
+        <div class="text-center mt-5">
+            <h5><%= t("noListingsFound") %></h5>
+            <a href="/listings" class="btn btn-dark mt-3"><%= t("browsingHistory") %></a>
+        </div>
+    <% } else { %>
+        <% wishlist.forEach(item => { %>
+        <div class="col-md-4 mb-4">
+            <div class="card listing-card h-100">
+                <img src="<%= item.listing.image?.url || 'https://placehold.co/600x400?text=No+Image' %>" class="card-img-top" alt="<%= item.listing.title %>">
+                <div class="card-body">
+                    <h5 class="card-title"><%= item.listing.title %></h5>
+                    <p class="card-text text-muted"><%= item.listing.location %>, <%= item.listing.country %></p>
+                    <p class="card-text">
+                        <strong>&#8377;<%= item.listing.price.toLocaleString("en-IN") %></strong> <%= t("perNight") %>
+                        <span class="text-muted small">&#183; <%= t("youSavedAt") %> &#8377;<%= item.savedPrice.toLocaleString("en-IN") %></span>
+                    </p>
+                    <% if(item.drop > 0){ %>
+                        <p class="badge bg-success"><i class="fa-solid fa-arrow-down"></i> <%= t("priceDropped",{X:item.drop.toLocaleString("en-IN")}) %></p>
+                    <% } else if(item.rise > 0){ %>
+                        <p class="badge bg-warning text-dark"><i class="fa-solid fa-arrow-up"></i> <%= t("priceIncreased",{X:item.rise.toLocaleString("en-IN")}) %></p>
+                    <% } else { %>
+                        <p class="badge bg-light text-muted"><%= t("newest") %></p>
+                    <% } %>
+                </div>
+                <div class="card-footer bg-body border-0 d-flex gap-2">
+                    <a href="/listings/<%= item.listing._id %>" class="btn btn-dark flex-grow-1"><%= t("viewDetails") %></a>
+                    <form method="POST" action="/listings/<%= item.listing._id %>/wishlist">
+                        <button type="submit" class="btn btn-outline-danger" title="Remove from saved" aria-label="Remove from saved"><i class="fa-solid fa-heart"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+</div>

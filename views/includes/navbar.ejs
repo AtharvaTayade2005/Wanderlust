@@ -1,29 +1,41 @@
-<nav class="navbar navbar-expand sticky-top bg-white border-bottom shadow-sm">
+<nav class="navbar navbar-expand sticky-top bg-body border-bottom shadow-sm">
   <div class="container-fluid">
     <a class="navbar-brand" href="/listings" aria-label="Wanderlust home">
       <i class="fa-solid fa-compass" aria-hidden="true"></i>
-      <span>Wanderlust</span>
+      <span><%= t("brand") %></span>
     </a>
     <div class="navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="/listings">Home</a>
+          <a class="nav-link" href="/listings"><%= t("allListings") %></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/listings">All Listings</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/listings/new">Add Listing</a>
+          <a class="nav-link" href="/listings/new"><%= t("addListing") %></a>
         </li>
       </ul>
     </div>
-    <div class="navbar-nav ms-auto">
+    <div class="navbar-nav ms-auto align-items-center">
+      <div class="dropdown me-2">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fa-solid fa-globe"></i> <%= lang === "hi" ? "हिन्दी" : "English" %>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="#" data-tolang="en">English</a></li>
+          <li><a class="dropdown-item" href="#" data-tolang="hi">हिन्दी</a></li>
+        </ul>
+      </div>
+      <button id="theme-toggle" class="btn btn-sm btn-outline-secondary me-2" type="button" aria-label="Toggle dark mode">
+        <i class="fa-solid fa-moon"></i>
+      </button>
       <% if(!currUser) { %>
-      <a class="nav-link" href="/signup">Signup</a>
-      <a class="nav-link" href="/login">Login</a>
+      <a class="nav-link" href="/signup"><%= t("signup") %></a>
+      <a class="nav-link" href="/login"><%= t("login") %></a>
       <%}%>
       <% if(currUser) { %>
-      <a class="nav-link" href="/logout">Log Out</a>
+      <a class="nav-link" href="/bookings/my"><%= t("trips") %></a>
+      <a class="nav-link" href="/wishlist"><i class="fa-solid fa-heart"></i> <%= t("saved") %></a>
+      <a class="nav-link" href="/profile"><%= currUser.username %></a>
+      <a class="nav-link" href="/logout"><%= t("logout") %></a>
       <% } %>
     </div>
   </div>

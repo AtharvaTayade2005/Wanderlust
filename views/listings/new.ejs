@@ -3,7 +3,7 @@
 <div class="row mt-3">
     <div class="col-8 offset-2">
         <h3>Create a new listing</h3>
-        <form method="POST" action="/listings" nonvalidate class="needs-validation">
+        <form method="POST" action="/listings" nonvalidate class="needs-validation" <%= cloudinaryConfigured ? 'enctype="multipart/form-data"' : '' %>>
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input name="listing[title]" id="title" placeholder="enter title" type="text" class="form-control" required>
@@ -13,11 +13,18 @@
                 <label for="description" class="form-label">Description</label>
                 <textarea name="listing[description]" id="description" placeholder="enter description" class="form-control" required></textarea>
             </div>
+            <% if(cloudinaryConfigured){ %>
+            <div class="mb-3">
+                <label for="image" class="form-label">Image (upload)</label>
+                <input name="listing[image]" id="image" type="file" accept="image/*" class="form-control">
+            </div>
+            <% } else { %>
             <div class="mb-3">
                 <label for="image" class="form-label">Image URL</label>
                 <input name="listing[image][url]" id="image" placeholder="enter image URL/link" type="text" class="form-control">
-                <div class="invalid-feedback">Please enter a valid price</div>
+                <div class="invalid-feedback">Please enter a valid image URL</div>
             </div>
+            <% } %>
             <div class="mb-3">
                 <label for="price" class="form-label">Price</label>
                 <input name="listing[price]" id="price" placeholder="enter price" type="number" class="form-control" required>

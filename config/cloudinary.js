@@ -1,0 +1,43 @@
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const multer = require("multer");
+
+const configured = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET &&
+  !process.env.CLOUDINARY_CLOUD_NAME.startsWith("your_")
+);
+
+let upload=(req,res,next)=>next();
+upload.single=()=>upload;
+let storage=null;
+
+if (configured) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "wanderlust_listings",
+      allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    },
+  });
+
+  upload = multer({ storage });
+}
+
+async function deleteImage(filename) {
+  if (!configured || !filename) return;
+  try {
+    await cloudinary.uploader.destroy(filename);
+  } catch (err) {
+    console.error("cloudinary delete failed:", err.message);
+  }
+}
+
+module.exports = { cloudinary, storage, upload, configured, deleteImage };

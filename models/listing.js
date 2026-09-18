@@ -20,10 +20,22 @@ const listingSchema=new schema({
             ref:"Review",
         }
     ],
+    geometry:{
+        type:{
+            type:String,
+            enum:["Point"],
+            default:"Point",
+        },
+        coordinates:{
+            type:[Number],
+        },
+    },
     owner:{
         type:schema.Types.ObjectId,
         ref:"User",
     },
+},{
+    timestamps:true,
 });
 
 

@@ -1,0 +1,50 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+    <h3><%= t("myTrips") %></h3>
+    <% if(bookings.length === 0){ %>
+        <p class="text-muted"><%= t("noBookings") %> <a href="/listings"><%= t("browsingHistory") %></a></p>
+    <% } else { %>
+        <div class="row g-4 mt-1">
+            <% for(let booking of bookings){ %>
+            <div class="col-md-6 col-lg-4">
+                <div class="card listing-card h-100">
+                    <% if(booking.listing){ %>
+                    <img src="<%= booking.listing.image?.url || 'https://placehold.co/600x400?text=No+Image' %>" class="card-img-top" alt="<%= booking.listing.title %>" style="height:200px;object-fit:cover">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= booking.listing.title %></h5>
+                        <p class="card-text small">
+                            <span class="badge <%= booking.status === 'confirmed' ? 'bg-success' : 'bg-secondary' %>"><%= booking.status %></span>
+                            <% if(booking.locked){ %>
+                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-lock"></i> <%= t("priceLocked") %></span>
+                            <% } %><br>
+                            <%= t("checkIn") %>: <%= booking.checkIn.toLocaleDateString("en-IN") %><br>
+                            <%= t("checkOut") %>: <%= booking.checkOut.toLocaleDateString("en-IN") %><br>
+                            <%= booking.nights %> <%= t("nights") %> &middot; <%= booking.guests %> <%= t("guests") %><br>
+                        </p>
+                        <p class="fw-bold mb-2">&#8377;<%= booking.totalPrice.toLocaleString("en-IN") %></p>
+                        <% if(booking.paymentMode === 'deposit'){ %>
+                        <p class="mb-2 small">
+                            <span class="badge bg-info text-dark"><i class="fa-solid fa-circle-check"></i> <%= t("depositPaid") %>: &#8377;<%= (booking.depositAmount||0).toLocaleString("en-IN") %></span><br>
+                            <span class="text-muted"><%= t("balanceDue") %>: &#8377;<%= ((booking.totalPrice||0)-(booking.depositAmount||0)).toLocaleString("en-IN") %> <i class="fa-solid fa-lock"></i> <%= t("priceLocked") %></span>
+                        </p>
+                        <% } %>
+                        <a href="/listings/<%= booking.listing._id %>" class="btn btn-sm btn-outline-dark">View listing</a>
+                        <form method="POST" action="/bookings/<%= booking._id %>?_method=DELETE" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                        </form>
+                    </div>
+                    <% } else { %>
+                    <div class="card-body">
+                        <p class="text-muted">Listing no longer available</p>
+                        <form method="POST" action="/bookings/<%= booking._id %>?_method=DELETE" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                        </form>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    <% } %>
+</div>

@@ -1,0 +1,80 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4">
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <img src="<%= profileUser.avatar || 'https://placehold.co/150x150?text=User' %>" class="rounded-circle mb-3" style="width:110px;height:110px;object-fit:cover" alt="<%= profileUser.username %>">
+                <h4><%= profileUser.username %></h4>
+                <p class="text-muted small mb-1">Member since <%= profileUser.createdAt?.toLocaleDateString("en-IN", {month:"long", year:"numeric"}) %></p>
+                <p class="text-muted mb-3"><%= profileUser.email %></p>
+                <p><%= profileUser.bio || "No bio yet." %></p>
+                <div class="d-flex justify-content-around small">
+                    <div><strong><%= listings.length %></strong><br>Listings</div>
+                    <div><strong><%= reviews.length %></strong><br>Reviews</div>
+                    <div><strong><%= savedCount %></strong><br>Saved</div>
+                </div>
+            </div>
+        </div>
+
+        <% if(isOwn){ %>
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-body">Edit profile</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="avatar" class="form-label small">Avatar URL</label>
+                        <input type="url" id="avatar" name="avatar" value="<%= profileUser.avatar || '' %>" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bio" class="form-label small">Bio</label>
+                        <textarea id="bio" name="bio" rows="3" class="form-control"><%= profileUser.bio || '' %></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100">Save profile</button>
+                </form>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <div class="col-lg-8">
+        <h5 class="mb-3">Listings by <%= profileUser.username %></h5>
+        <% if(listings.length === 0){ %>
+            <p class="text-muted">No listings yet.</p>
+        <% } else { %>
+        <div class="row">
+            <% listings.forEach(listing => { %>
+            <div class="col-md-6 mb-3">
+                <div class="card listing-card h-100">
+                    <img src="<%= listing.image?.url || 'https://placehold.co/600x400?text=No+Image' %>" class="card-img-top" alt="<%= listing.title %>">
+                    <div class="card-body">
+                        <h6 class="card-title"><%= listing.title %></h6>
+                        <p class="card-text text-muted"><%= listing.location %>, <%= listing.country %></p>
+                    </div>
+                    <div class="card-footer bg-body border-0">
+                        <a href="/listings/<%= listing._id %>" class="btn btn-dark w-100 btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+        <% } %>
+
+        <h5 class="mt-4 mb-3">Recent reviews by <%= profileUser.username %></h5>
+        <% if(reviews.length === 0){ %>
+            <p class="text-muted">No reviews yet.</p>
+        <% } else { %>
+        <ul class="list-group">
+            <% reviews.slice(0,5).forEach(r => { %>
+            <li class="list-group-item">
+                <strong><%= r.listing?.title || 'Deleted listing' %></strong>
+                <span class="text-warning">
+                    <% for(let i=1;i<=5;i++){ %><% if(i<=r.rating){ %>&#9733;<% }else{ %><span class="text-muted">&#9733;</span><% } %><% } %>
+                </span>
+                <p class="mb-0 small"><%= r.comment %></p>
+            </li>
+            <% }) %>
+        </ul>
+        <% } %>
+    </div>
+</div>

@@ -6,8 +6,23 @@ const userSchema=new Schema({
     email:{
         type:String,
         required:true
-    }
-
+    },
+    bio:{
+        type:String,
+        default:"",
+    },
+    avatar:{
+        type:String,
+        default:"",
+    },
+    wishlist:[
+        {
+            type:Schema.Types.ObjectId,
+            ref:"Listing",
+        }
+    ],
+},{
+    timestamps:true,
 });
 
 userSchema.plugin(passportLocalMongoose);

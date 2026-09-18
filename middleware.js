@@ -1,6 +1,7 @@
 const Listing=require("./models/listing.js");
 const {listingSchema: schema, reviewschema}=require("./schema.js");
 const expresserror=require("./utils/expresserror.js");
+const {Types}=require("mongoose");
 
 module.exports.validatelisting=(req,res,next)=>{
     let {error}=schema.validate(req.body);
@@ -51,6 +52,14 @@ module.exports.isOwner=async(req,res,next)=>{
     if(!listing.owner || !req.user || !listing.owner.equals(req.user._id)){
         req.flash("error","You are not the owner of this listing");
         return res.redirect(`/listings/${id}`);
+    }
+    next();
+};
+
+module.exports.isValidId=(req,res,next)=>{
+    if(!Types.ObjectId.isValid(req.params.id)){
+        req.flash("error","Invalid id");
+        return res.redirect("/listings");
     }
     next();
 };

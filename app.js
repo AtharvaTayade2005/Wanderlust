@@ -1,11 +1,13 @@
 const express=require("express");
+require("dotenv").config();
 const app=express();
+const helmet=require("helmet");
 const mongoose=require("mongoose");
 const Listing=require("./models/listing.js");
 const wrapasync=require("./utils/wrapasync.js");
 const expresserror=require("./utils/expresserror.js");
 const {listingSchema: schema, reviewschema}=require("./schema.js");
-const  mongo_url="mongodb://127.0.0.1:27017/wanderlust";
+const  mongo_url=process.env.MONGODB_URL||"mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
 const review=require("./models/review.js");
@@ -17,8 +19,13 @@ const passport=require("passport");
 const localStrategy=require("passport-local");
 const User=require("./models/user.js");
 const userRouter=require("./routes/user.js");
+const bookingRouter=require("./routes/booking.js");
+const wishlistRouter=require("./routes/wishlist.js");
+const {configured}=require("./config/cloudinary.js");
+const {mapboxToken}=require("./config/geocoding.js");
+const {translate}=require("./config/i18n.js");
 const sessionOptions={
-    secret:"mysecretcode",
+    secret:process.env.SESSION_SECRET||"mysecretcode",
     resave:false,
     saveUninitialized:true,
     cookie:{
@@ -38,6 +45,26 @@ async function main(){
 
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
+app.set("trust proxy",1);
+app.use(
+    helmet({
+        contentSecurityPolicy:{
+            useDefaults:true,
+            directives:{
+                "default-src":["'self'"],
+                "script-src":["'self'","'unsafe-inline'","https://cdn.jsdelivr.net","https://cdnjs.cloudflare.com","https://api.mapbox.com"],
+                "style-src":["'self'","'unsafe-inline'","https://cdn.jsdelivr.net","https://cdnjs.cloudflare.com","https://fonts.googleapis.com","https://api.mapbox.com"],
+                "font-src":["'self'","data:","https://fonts.gstatic.com","https://cdnjs.cloudflare.com"],
+                "img-src":["'self'","data:","blob:","https:"],
+                "connect-src":["'self'","https://api.mapbox.com"],
+                "worker-src":["'self'","blob:"],
+                "frame-src":["'self'","blob:"],
+                "object-src":["'none'"],
+            },
+        },
+        crossOriginEmbedderPolicy:false,
+    })
+);
 app.use(express.urlencoded({extended:true}));
 app.engine('ejs',ejsmate);
 app.use(express.static(path.join(__dirname,"/public")));
@@ -53,6 +80,12 @@ app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
     res.locals.currUser=req.user;
+    res.locals.cloudinaryConfigured=configured;
+    res.locals.mapboxToken=mapboxToken;
+    if(req.query.lang==="hi"||req.query.lang==="en") req.session.lang=req.query.lang;
+    const active=req.session.lang==="hi"?"hi":"en";
+    res.locals.lang=active;
+    res.locals.t=(key,vars)=>translate(active,key,vars);
     next();
 });
 
@@ -71,6 +104,8 @@ app.get("/",(req,res)=>{
 });
 
 app.use("/",userRouter);
+app.use("/",bookingRouter);
+app.use("/",wishlistRouter);
 app.use("/listings",listingRouter);
 app.use("/listings/:id/reviews",ReviewRouter);
 
@@ -110,6 +145,6 @@ app.use((err,req,res,next)=>{
     console.error(err);
     res.status(err.statusCode||500).render("listings/error.ejs",{err});
 });
-app.listen(8080,()=>{
-    console.log("server is running");
+app.listen(process.env.PORT||8080,()=>{
+    console.log(`server is running on port ${process.env.PORT||8080}`);
 });
