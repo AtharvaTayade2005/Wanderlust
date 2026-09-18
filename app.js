@@ -52,7 +52,22 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
+    res.locals.currUser=req.user;
     next();
+});
+
+// HTML forms only support GET and POST. This lets forms use
+// ?_method=PUT and ?_method=DELETE for RESTful update/delete routes.
+app.use((req,res,next)=>{
+    const method=req.query._method?.toUpperCase();
+    if(method==="PUT" || method==="DELETE"){
+        req.method=method;
+    }
+    next();
+});
+
+app.get("/",(req,res)=>{
+    res.redirect("/listings");
 });
 
 app.use("/",userRouter);
@@ -69,20 +84,7 @@ app.get("/demouser",async(req,res)=>{
     res.send(registereduser);
 
 })
-// HTML forms only support GET and POST. This lets forms use
-// ?_method=PUT and ?_method=DELETE for RESTful update/delete routes.
-app.use((req,res,next)=>{
-    const method=req.query._method?.toUpperCase();
-    if(method==="PUT" || method==="DELETE"){
-        req.method=method;
-    }
-    next();
-});
-
-app.get("/",(req,res)=>{
-    res.redirect("/listings");
-});
-//reviews
+// reviews
 
 app.get("/testlisting",async (req,res)=>{
     let samplelisting=new Listing({
@@ -100,6 +102,9 @@ app.get("/testlisting",async (req,res)=>{
 app.use((err,req,res,next)=>{
     console.error(err);
     res.status(err.statusCode||500).render("listings/error.ejs",{err});
+});
+app.get("/favicon.ico",(req,res)=>{
+    res.status(204).end();
 });
 app.use((req,res,next)=>{
     next(new expresserror(404,"Page not found!"));
