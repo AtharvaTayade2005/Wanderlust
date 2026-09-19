@@ -2,7 +2,7 @@ const express=require("express");
 const router=express.Router();
 const wrapasync=require("../utils/wrapasync.js");
 const userController=require("../controllers/users.js");
-const {isLoggedIn}=require("../middleware.js");
+const {isLoggedIn}=require("../utils/middleware.js");
 const rateLimit=require("express-rate-limit");
 
 function makeAuthLimiter(redirectTo){

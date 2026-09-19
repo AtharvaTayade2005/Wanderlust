@@ -1,7 +1,7 @@
 const express=require("express");
 const router=express.Router();
 const wrapasync=require("../utils/wrapasync.js");
-const {validatelisting,isLoggedIn,isOwner,isValidId}=require("../middleware.js");
+const {validatelisting,isLoggedIn,isOwner,isValidId}=require("../utils/middleware.js");
 const listingController=require("../controllers/listings.js");
 const {upload}=require("../config/cloudinary.js");
 

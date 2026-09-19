@@ -3,11 +3,11 @@ require("dotenv").config();
 const app=express();
 const helmet=require("helmet");
 const mongoose=require("mongoose");
+const {connectDB}=require("./config/db.js");
 const Listing=require("./models/listing.js");
 const wrapasync=require("./utils/wrapasync.js");
 const expresserror=require("./utils/expresserror.js");
 const {listingSchema: schema, reviewschema}=require("./schema.js");
-const  mongo_url=process.env.MONGODB_URL||"mongodb://127.0.0.1:27017/wanderlust";
 const path=require("path");
 const ejsmate=require("ejs-mate");
 const review=require("./models/review.js");
@@ -34,14 +34,6 @@ const sessionOptions={
         httpOnly:true,
     },
 };
-main().then(()=>{
-    console.log("connected to db");
-}).catch(err=>{
-    console.log(err);
-});
-async function main(){
-    await mongoose.connect(mongo_url);
-}
 
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
@@ -99,6 +91,17 @@ app.use((req,res,next)=>{
     next();
 });
 
+// Ensures the DB is connected before handling a request (matters on serverless,
+// where a fresh process may serve a request before the async connect resolves).
+app.use(async (req,res,next)=>{
+    try{
+        await connectDB();
+        next();
+    }catch(err){
+        next(err);
+    }
+});
+
 app.get("/",(req,res)=>{
     res.render("landing.ejs");
 });
@@ -145,6 +148,14 @@ app.use((err,req,res,next)=>{
     console.error(err);
     res.status(err.statusCode||500).render("listings/error.ejs",{err});
 });
-app.listen(process.env.PORT||8080,()=>{
-    console.log(`server is running on port ${process.env.PORT||8080}`);
-});
+
+if(require.main===module){
+    connectDB()
+        .then(()=>console.log("connected to db"))
+        .catch((err)=>console.error("db connection failed:",err.message));
+    app.listen(process.env.PORT||8080,()=>{
+        console.log(`server is running on port ${process.env.PORT||8080}`);
+    });
+}
+
+module.exports=app;

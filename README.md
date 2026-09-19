@@ -64,15 +64,26 @@ Run the app at http://localhost:8080
 3. Start command: `npm start` (Node). Seed once with `node init/index.js` against the production DB.
 4. `app.set("trust proxy",1)` is already enabled so `express-rate-limit` counts IPs correctly behind a reverse proxy.
 
+### Vercel-specific
+
+- Vercel auto-detects a root `middleware.js`/`middleware.ts` as Edge Middleware — this project's Express middleware lives in `utils/middleware.js` (outside the root) to avoid that. Do NOT create a file named `middleware.js` in the repo root.
+- `app.js` exports the Express app and only calls `listen()` when run directly (`require.main === module`), so Vercel invokes it as a serverless function via `api/index.js` (`vercel.json` routes all requests there).
+- `config/db.js` memoizes the MongoDB connection and `app.js` waits for it per request — important for serverless cold starts.
+- **Sessions**: the default in-memory session store won't persist across serverless instances. For reliable logins on Vercel, add `connect-mongo` as the session store (see `app.js` `sessionOptions`). Sessions work fine on long-running hosts (Render/Railway).
+- Remove the `/demouser` and `/testlisting` dev-only endpoints (`app.js`) before going public — they create DB data without auth.
+- Vercel env needs at least `MONGODB_URL` (Atlas), `SESSION_SECRET`, `MAPBOX_TOKEN`, Cloudinary keys, and Razorpay keys.
+
 ## Project Structure
 
 ```
-app.js               Express setup, middleware, routers
+app.js               Express setup, routers (exports app for serverless)
+api/index.js         Vercel entry point (re-exports app)
+vercel.json          Vercel build/routes config
 routes/              Route definitions (listings, reviews, users, bookings, wishlist)
 controllers/         Route handlers / business logic
 models/              Mongoose schemas (Listing, Review, User, Booking)
-middleware.js        Validation, auth, ownership, id checks
-config/              Cloudinary + Mapbox geocoding setup
+utils/middleware.js  Validation, auth, ownership, id checks
+config/              Cloudinary, Razorpay, Mapbox geocoding, DB + i18n setup
 views/               EJS templates (ejs-mate layouts)
 public/              Static assets (CSS, JS)
 init/                Database seeder (node init/index.js)

@@ -1,6 +1,6 @@
-const Listing=require("./models/listing.js");
-const {listingSchema: schema, reviewschema}=require("./schema.js");
-const expresserror=require("./utils/expresserror.js");
+const Listing=require("../models/listing.js");
+const {listingSchema: schema, reviewschema}=require("../schema.js");
+const expresserror=require("./expresserror.js");
 const {Types}=require("mongoose");
 
 module.exports.validatelisting=(req,res,next)=>{

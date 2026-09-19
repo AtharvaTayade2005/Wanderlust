@@ -1,7 +1,7 @@
 const express=require("express");
 const router=express.Router({mergeParams:true});
 const wrapasync=require("../utils/wrapasync.js");
-const {isLoggedIn}=require("../middleware.js");
+const {isLoggedIn}=require("../utils/middleware.js");
 const bookingController=require("../controllers/bookings.js");
 
 router.route("/listings/:id/bookings")
