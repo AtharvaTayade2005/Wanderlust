@@ -30,3 +30,56 @@
         });
     });
 })();
+
+(function(){
+    if(!document.getElementById("landing-hero")) return;
+
+    function animateCounter(el){
+        var target = Number(el.dataset.target) || 0;
+        var dur = 1200;
+        var start = null;
+        function tick(now){
+            if(!start) start = now;
+            var p = Math.min((now - start) / dur, 1);
+            el.textContent = Math.floor(p * target).toLocaleString("en-IN");
+            if(p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    }
+
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelectorAll(".counter").forEach(function(el){
+        var run = function(){ animateCounter(el); };
+        if(reduce){ run(); return; }
+        var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(e){
+                if(e.isIntersecting){ run(); io.unobserve(e.target); }
+            });
+        }, { threshold: 0.5 });
+        io.observe(el);
+    });
+
+    document.querySelectorAll(".reveal").forEach(function(el){
+        if(reduce){ el.classList.add("reveal-visible"); return; }
+        var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(e){
+                if(e.isIntersecting){ el.classList.add("reveal-visible"); io.unobserve(el); }
+            });
+        }, { threshold: 0.15 });
+        io.observe(el);
+    });
+
+    var rotor = document.querySelector(".rotor");
+    if(rotor){
+        var words = ["Stay", "Escape", "Celebrate", "Recharge"];
+        var i = 0;
+        setInterval(function(){
+            i = (i + 1) % words.length;
+            rotor.style.opacity = "0";
+            setTimeout(function(){
+                rotor.textContent = words[i];
+                rotor.style.opacity = "1";
+            }, 300);
+        }, 2200);
+    }
+})();

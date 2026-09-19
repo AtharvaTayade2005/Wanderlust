@@ -10,7 +10,7 @@ A full-stack Airbnb-style listing and booking web app built as a portfolio/resum
 - Wishlist ("Saved homes") with price tracking — get shown a price-drop alert when a saved home gets cheaper
 - English / हिन्दी language toggle with INR-first rupee pricing, and a dark-mode toggle
 - Booking system with date-collision detection, nightly price totals, and a Trips page
-- Wishlist ("Saved homes") with one-click toggle
+- Animated marketing landing page (`/`) with crossfading hero imagery, scroll-reveal sections, animated counters, and a word rotor — all pure CSS/vanilla JS
 - User profiles with bio, avatar, stats, and their listings/reviews
 - Star-rating reviews with animated starability widget
 - Interactive Mapbox map showing each listing's location (geoJSON)

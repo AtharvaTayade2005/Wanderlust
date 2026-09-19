@@ -1,0 +1,125 @@
+<% layout("/layouts/landing") %>
+
+<% const heroImages = [
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=80",
+  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1800&q=80",
+  "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1800&q=80",
+]; %>
+
+<section class="hero" id="landing-hero">
+  <% heroImages.forEach((src, i) => { %>
+    <div class="hero-bg hero-bg-<%= i + 1 %>" style="background-image:url('<%= src %>')"></div>
+  <% }) %>
+  <div class="hero-overlay"></div>
+  <div class="container hero-content text-center">
+    <p class="hero-eyebrow reveal"><i class="fa-solid fa-compass me-2"></i>Wanderlust</p>
+    <h1 class="hero-title reveal">Find your next <span class="rotor">Stay</span></h1>
+    <p class="hero-sub reveal">Handpicked homes across India. Instant booking. Transparent pricing. <span class="no-hidden-fees">Zero hidden fees.</span></p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap reveal">
+      <a href="/listings" class="cta-btn cta-primary"><%= t("exploreStays") %> <i class="fa-solid fa-arrow-right"></i></a>
+      <a href="/listings/new" class="cta-btn cta-ghost"><i class="fa-solid fa-house-circle-check"></i> <%= t("hostYourHome") %></a>
+    </div>
+  </div>
+  <a href="#landing-stats" class="scroll-hint" aria-label="Scroll down">
+    <i class="fa-solid fa-chevron-down"></i>
+  </a>
+</section>
+
+<section class="landing-section" id="landing-stats">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="container">
+    <div class="row text-center g-4 stats-row">
+      <div class="col-6 col-lg-3 reveal">
+        <div class="stat-num"><span class="counter" data-target="29">0</span>+</div>
+        <div class="stat-label">Handpicked homes</div>
+      </div>
+      <div class="col-6 col-lg-3 reveal">
+        <div class="stat-num"><span class="counter" data-target="7">0</span>+</div>
+        <div class="stat-label">Destinations</div>
+      </div>
+      <div class="col-6 col-lg-3 reveal">
+        <div class="stat-num"><span class="counter" data-target="100">0</span>%</div>
+        <div class="stat-label">Instant bookings</div>
+      </div>
+      <div class="col-6 col-lg-3 reveal">
+        <div class="stat-num">&#8377;<span class="counter" data-target="0">0</span></div>
+        <div class="stat-label">Hidden fees</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="landing-section bg-body-tertiary">
+  <div class="container">
+    <div class="text-center mb-4 reveal">
+      <h2>Explore by mood</h2>
+      <p class="text-muted">From beaches to mountains — pick where you belong.</p>
+    </div>
+    <div class="row g-4">
+      <% const categories = [
+          { label: "Beach", q: "goa", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80" },
+          { label: "Mountains", q: "manali", img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80" },
+          { label: "Heritage", q: "jaipur", img: "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=900&q=80" },
+          { label: "City", q: "mumbai", img: "https://images.unsplash.com/photo-1529257414772-1960b7bea4eb?auto=format&fit=crop&w=900&q=80" },
+          { label: "Riverside", q: "rishikesh", img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" },
+          { label: "Countryside", q: "delhi", img: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80" },
+      ] %>
+      <% categories.forEach((c, i) => { %>
+      <div class="col-6 col-md-4 reveal">
+        <a class="cat-card" href="/listings?q=<%= c.q %>">
+          <img src="<%= c.img %>" alt="<%= c.label %>" loading="lazy">
+          <div class="cat-overlay"><span><%= c.label %></span><i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="landing-section">
+  <div class="container">
+    <div class="text-center mb-4 reveal">
+      <h2>Why Wanderlust</h2>
+      <p class="text-muted">Built differently — for the traveller who hates surprises.</p>
+    </div>
+    <div class="row g-4">
+      <% const features = [
+          { icon: "fa-bolt", title: "Instant booking", desc: "No host approval waits. Booked is booked — instantly confirmed." },
+          { icon: "fa-receipt", title: "Transparent pricing", desc: "Nightly rate split right in front of you. Guest fees &#8377;0. Always." },
+          { icon: "fa-lock", title: "Price-lock with deposit", desc: "Pay 20% now, lock tonight's rate, settle the balance before you travel." },
+          { icon: "fa-chart-line", title: "Wishlist price alerts", desc: "Save a home and get alerted the moment its price drops." },
+      ] %>
+      <% features.forEach((f) => { %>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="feature-card h-100">
+          <div class="feature-icon"><i class="fa-solid <%= f.icon %>"></i></div>
+          <h5><%= f.title %></h5>
+          <p class="text-muted mb-0"><%- f.desc %></p>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="landing-section cta-split">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6 reveal">
+        <div class="cta-card cta-guest">
+          <h3><i class="fa-solid fa-suitcase me-2"></i>Planning a trip?</h3>
+          <p>Browse 29+ verified homes, compare in Rupees, book instantly.</p>
+          <a href="/listings" class="cta-btn cta-primary"><%= t("exploreStays") %></a>
+        </div>
+      </div>
+      <div class="col-lg-6 reveal">
+        <div class="cta-card cta-host">
+          <h3><i class="fa-solid fa-house-chimney me-2"></i>Own a property?</h3>
+          <p>List it for free, get instant bookings, track earnings on your dashboard.</p>
+          <a href="/listings/new" class="cta-btn cta-ghost"><%= t("hostYourHome") %></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
