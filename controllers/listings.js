@@ -30,7 +30,19 @@ module.exports.index=async(req,res)=>{
     else if(sort==="oldest") query=query.sort({createdAt:1});
 
     const allListings=await query;
-    res.render("listings/index.ejs",{allListings,q,minPrice,maxPrice,sort});
+
+    let savedIds=new Set();
+    if(req.user){
+        const saved=await Wishlist.find({user:req.user._id}).select("listing");
+        saved.forEach((s)=>savedIds.add(String(s.listing)));
+    }
+
+    const hasFilters=Boolean(q||minPrice||maxPrice||sort);
+    const spotlight=hasFilters||allListings.length===0
+        ? null
+        : allListings.reduce((best,l)=>!(best)||l.reviews.length>best.reviews.length?l:best,null);
+
+    res.render("listings/index.ejs",{allListings,q,minPrice,maxPrice,sort,savedIds,spotlight});
 }
 
 module.exports.renderNewForm=(req,res)=>{

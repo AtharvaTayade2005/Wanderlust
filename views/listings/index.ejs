@@ -28,20 +28,58 @@
     </div>
 </form>
 
-<div class="row mt-3">
-    <% allListings.forEach(listing => { %>
-        <div class="col-md-4 mb-4">
+<div class="d-flex justify-content-between align-items-center mt-3 mb-1">
+    <p class="mb-0 fw-semibold"><span class="text-dark"><%= allListings.length %></span> <%= t("staysFound") %></p>
+    <% if(spotlight){ %>
+    <p class="mb-0 small"><i class="fa-solid fa-fire text-danger"></i> <%= t("spotlight") %></p>
+    <% } %>
+</div>
+
+<% if(spotlight){ %>
+<div class="spotlight reveal">
+    <a href="/listings/<%= spotlight._id %>" class="d-block h-100">
+        <img src="<%= spotlight.image?.url || 'https://placehold.co/1200x500?text=Spotlight' %>" class="spotlight-img" alt="<%= spotlight.title %>">
+        <div class="spotlight-body">
+            <span class="spotlight-badge"><i class="fa-solid fa-star"></i> <%= t("spotlightBadge") %> &#183; <span class="star-count"><%= spotlight.reviews.length %></span> <%= t("guestReviews") %></span>
+            <h3 class="spotlight-title"><%= spotlight.title %></h3>
+            <p class="spotlight-loc"><i class="fa-solid fa-location-dot"></i> <%= spotlight.location %>, <%= spotlight.country %></p>
+            <p class="spotlight-price"><strong>&#8377;<%= spotlight.price.toLocaleString("en-IN") %></strong> <span><%= t("perNight") %></span></p>
+        </div>
+    </a>
+</div>
+<% } %>
+
+<div class="row mt-4">
+    <% allListings.forEach((listing, index) => { %>
+        <% if(spotlight && listing._id.equals(spotlight._id)) return; %>
+        <div class="col-md-4 mb-4 reveal" style="transition-delay:<%= (index % 3) * 90 %>ms">
             <div class="card listing-card h-100">
-                <img src="<%= listing.image?.url || 'https://placehold.co/600x400?text=No+Image' %>" class="card-img-top" alt="<%= listing.title %>">
+                <div class="listing-img-wrap">
+                    <img src="<%= listing.image?.url || 'https://placehold.co/600x400?text=No+Image' %>" class="card-img-top" alt="<%= listing.title %>">
+                    <% if(listing.reviews.length > 0){ %>
+                    <span class="rating-chip">
+                        <i class="fa-solid fa-star"></i>
+                        <%= (listing.reviews.reduce((a,r)=>a+(r.rating||0),0)/listing.reviews.length).toFixed(1) %>
+                        <span class="text-muted">(<%= listing.reviews.length %>)</span>
+                    </span>
+                    <% } %>
+                    <form method="POST" action="/listings/<%= listing._id %>/wishlist" class="heart-form">
+                        <button type="submit" class="heart-btn <%= savedIds.has(String(listing._id)) ? 'saved' : '' %>" aria-label="Save" title="<%= t('save') %>">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </form>
+                </div>
                 <div class="card-body">
                     <h5 class="card-title"><%= listing.title %></h5>
-                    <p class="card-text"><%= listing.description?.substring(0, 100) %>...</p>
-                    <p class="card-text"><strong>&#8377;<%= listing.price.toLocaleString("en-IN") %></strong> per night</p>
-                    <p class="card-text text-muted"><%= listing.location %>, <%= listing.country %></p>
+                    <p class="card-text">
+                        <strong>&#8377;<%= listing.price.toLocaleString("en-IN") %></strong> <%= t("perNight") %>
+                        <span class="text-danger">&#183; <%= t("noFees") %></span>
+                    </p>
+                    <p class="card-text text-muted"><i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %></p>
                     <p class="card-text text-muted small">Listed by: <%= listing.owner?.username || 'Unknown' %></p>
                 </div>
-                <div class="card-footer bg-body border-0">
-                    <a href="/listings/<%= listing._id %>" class="btn btn-dark w-100"><%= t("viewDetails") %></a>
+                <div class="card-footer bg-body border-0 d-flex gap-2">
+                    <a href="/listings/<%= listing._id %>" class="btn btn-dark flex-grow-1"><%= t("viewDetails") %></a>
                 </div>
             </div>
         </div>

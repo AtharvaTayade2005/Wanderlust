@@ -32,6 +32,20 @@
 })();
 
 (function(){
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    document.querySelectorAll(".reveal").forEach(function(el){
+        if(reduce){ el.classList.add("reveal-visible"); return; }
+        var io = new IntersectionObserver(function(entries){
+            entries.forEach(function(e){
+                if(e.isIntersecting){ el.classList.add("reveal-visible"); io.unobserve(el); }
+            });
+        }, { threshold: 0.15 });
+        io.observe(el);
+    });
+})();
+
+(function(){
     if(!document.getElementById("landing-hero")) return;
 
     function animateCounter(el){
@@ -56,16 +70,6 @@
                 if(e.isIntersecting){ run(); io.unobserve(e.target); }
             });
         }, { threshold: 0.5 });
-        io.observe(el);
-    });
-
-    document.querySelectorAll(".reveal").forEach(function(el){
-        if(reduce){ el.classList.add("reveal-visible"); return; }
-        var io = new IntersectionObserver(function(entries){
-            entries.forEach(function(e){
-                if(e.isIntersecting){ el.classList.add("reveal-visible"); io.unobserve(el); }
-            });
-        }, { threshold: 0.15 });
         io.observe(el);
     });
 
