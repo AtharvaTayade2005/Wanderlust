@@ -7,6 +7,7 @@ A full-stack Airbnb-style listing and booking web app built as a portfolio/resum
 - User authentication (signup / login / logout) with Passport + sessions, strong-password policy enforced on signup
 - Listings: create, view, edit, delete (owner-protected), with Cloudinary image upload
 - Search and booking features: instant booking with all-inclusive transparent pricing (no hidden fees), plus a "pay 20% deposit to lock this price and finish later" price-lock option
+- Booking payments with Razorpay (test mode): pay the outstanding balance from your Trips page — order created server-side, signature-verified on callback, with a simulated fallback when keys are absent
 - Wishlist ("Saved homes") with price tracking — get shown a price-drop alert when a saved home gets cheaper
 - English / हिन्दी language toggle with INR-first rupee pricing, and a dark-mode toggle
 - Booking system with date-collision detection, nightly price totals, and a Trips page

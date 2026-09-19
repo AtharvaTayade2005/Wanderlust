@@ -54,6 +54,32 @@ const bookingSchema=new schema({
         default:null,
         min:0,
     },
+    paidAmount:{
+        type:Number,
+        default:0,
+        min:0,
+    },
+    payments:[
+        {
+            amount:{
+                type:Number,
+                required:true,
+                min:0,
+            },
+            method:{
+                type:String,
+                enum:["razorpay","manual"],
+                required:true,
+            },
+            razorpay_order_id:String,
+            razorpay_payment_id:String,
+            razorpay_signature:String,
+            paidAt:{
+                type:Date,
+                default:Date.now,
+            },
+        },
+    ],
     status:{
         type:String,
         enum:["confirmed","cancelled"],

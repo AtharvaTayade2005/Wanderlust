@@ -1,0 +1,57 @@
+<% layout("/layouts/boilerplate") %>
+
+<div
+    id="checkout-root"
+    class="checkout-root"
+    data-configured="<%= razorpayConfigured ? '1' : '0' %>"
+    data-booking-id="<%= booking._id %>"
+    data-name="<%= booking.listing?.title || 'Wanderlust booking' %>"
+    data-due="<%= due %>">
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-6 offset-lg-3">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="mb-1"><%= t("payForBooking") %></h4>
+                <p class="text-muted mb-4">
+                    <%= booking.listing?.title || 'Booking' %> &#183;
+                    <%= booking.checkIn.toLocaleDateString("en-IN") %> &rarr; <%= booking.checkOut.toLocaleDateString("en-IN") %> &#183;
+                    <%= booking.nights %> <%= t("nights") %>
+                </p>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span><%= t("bookingTotal") %></span>
+                    <strong>&#8377;<%= booking.totalPrice.toLocaleString("en-IN") %></strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><%= t("alreadyPaid") %></span>
+                    <span>&#8377;<%= booking.paidAmount.toLocaleString("en-IN") %></span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fw-semibold"><%= t("dueNow") %></span>
+                    <span class="due-amount">&#8377;<%= due.toLocaleString("en-IN") %></span>
+                </div>
+
+                <button type="button" id="rzp-button" class="btn btn-dark w-100 py-2 d-none">
+                    <i class="fa-solid fa-lock"></i> <%= t("payWithRazorpay") %>
+                </button>
+
+                <form id="simulate-form" method="POST" action="/bookings/<%= booking._id %>/pay/simulate" class="<%= razorpayConfigured ? 'd-none' : '' %>">
+                    <button type="submit" class="btn btn-dark w-100 py-2">
+                        <i class="fa-solid fa-circle-check"></i> <%= t("simulatePayment") %>
+                    </button>
+                    <p class="text-muted small text-center mt-2 mb-0"><%= t("noGatewayConfigured") %></p>
+                </form>
+
+                <a href="/bookings/my" class="d-block text-center text-muted small mt-3"><%= t("backToTrips") %></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if(razorpayConfigured){ %>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<div id="razorpay-status" class="text-center text-muted small mt-3 d-none"></div>
+<% } %>

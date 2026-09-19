@@ -20,19 +20,49 @@
                             <% } %><br>
                             <%= t("checkIn") %>: <%= booking.checkIn.toLocaleDateString("en-IN") %><br>
                             <%= t("checkOut") %>: <%= booking.checkOut.toLocaleDateString("en-IN") %><br>
-                            <%= booking.nights %> <%= t("nights") %> &middot; <%= booking.guests %> <%= t("guests") %><br>
+                            <%= booking.nights %> <%= t("nights") %> &middot; <%= booking.guests %> <%= t("guests") %>
                         </p>
-                        <p class="fw-bold mb-2">&#8377;<%= booking.totalPrice.toLocaleString("en-IN") %></p>
-                        <% if(booking.paymentMode === 'deposit'){ %>
-                        <p class="mb-2 small">
-                            <span class="badge bg-info text-dark"><i class="fa-solid fa-circle-check"></i> <%= t("depositPaid") %>: &#8377;<%= (booking.depositAmount||0).toLocaleString("en-IN") %></span><br>
-                            <span class="text-muted"><%= t("balanceDue") %>: &#8377;<%= ((booking.totalPrice||0)-(booking.depositAmount||0)).toLocaleString("en-IN") %> <i class="fa-solid fa-lock"></i> <%= t("priceLocked") %></span>
+                        <p class="fw-bold mb-1">&#8377;<%= booking.totalPrice.toLocaleString("en-IN") %> <span class="text-muted fw-normal small">total</span></p>
+
+                        <% const due = balanceDue(booking); %>
+                        <div class="payment-progress">
+                            <% const pct = Math.min(100, Math.round((booking.paidAmount / booking.totalPrice) * 100)); %>
+                            <div class="progress mb-1" style="height:8px">
+                                <div class="progress-bar bg-success" style="width:<%= pct %>%"></div>
+                            </div>
+                            <p class="small mb-1">
+                                <%= t("paid") %>: &#8377;<%= booking.paidAmount.toLocaleString("en-IN") %>
+                                <span class="text-muted">(&#8377;<%= booking.totalPrice.toLocaleString("en-IN") %>)</span>
+                            </p>
+                        </div>
+
+                        <% if(due > 0){ %>
+                        <p class="mb-2">
+                            <span class="badge bg-danger"><i class="fa-solid fa-hourglass-half"></i> <%= t("balanceDueLabel") %>: &#8377;<%= due.toLocaleString("en-IN") %></span>
                         </p>
+                        <a href="/bookings/<%= booking._id %>/pay" class="btn btn-sm btn-dark mb-2"><i class="fa-solid fa-credit-card"></i> <%= t("payBalance") %></a>
+                        <% } else { %>
+                        <p class="mb-2"><span class="badge bg-success"><i class="fa-solid fa-circle-check"></i> <%= t("paidFull") %></span></p>
                         <% } %>
+
                         <a href="/listings/<%= booking.listing._id %>" class="btn btn-sm btn-outline-dark">View listing</a>
                         <form method="POST" action="/bookings/<%= booking._id %>?_method=DELETE" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
                         </form>
+
+                        <% if(booking.payments && booking.payments.length > 0){ %>
+                        <hr class="my-2">
+                        <p class="small text-muted mb-1 fw-semibold"><%= t("paymentHistory") %></p>
+                        <ul class="list-unstyled small mb-0">
+                            <% for(let p of booking.payments){ %>
+                            <li>
+                                <i class="fa-solid fa-check-circle text-success"></i> &#8377;<%= p.amount.toLocaleString("en-IN") %>
+                                <% if(p.method === 'razorpay'){ %><span class="badge bg-primary">Razorpay</span><% } %>
+                                <span class="text-muted"><%= p.paidAt.toLocaleDateString("en-IN") %>, <%= p.paidAt.toLocaleTimeString("en-IN", {hour:'2-digit', minute:'2-digit'}) %></span>
+                            </li>
+                            <% } %>
+                        </ul>
+                        <% } %>
                     </div>
                     <% } else { %>
                     <div class="card-body">

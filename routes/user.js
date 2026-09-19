@@ -5,21 +5,29 @@ const userController=require("../controllers/users.js");
 const {isLoggedIn}=require("../middleware.js");
 const rateLimit=require("express-rate-limit");
 
-const authLimiter=rateLimit({
-    windowMs:15*60*1000,
-    max:20,
-    standardHeaders:true,
-    legacyHeaders:false,
-    message:{error:"Too many attempts. Please try again later."},
-});
+function makeAuthLimiter(redirectTo){
+    return rateLimit({
+        windowMs:15*60*1000,
+        max:20,
+        standardHeaders:true,
+        legacyHeaders:false,
+        handler:(req,res,next)=>{
+            req.flash("error","Too many attempts. Please try again after 15 minutes.");
+            res.redirect(redirectTo);
+        },
+    });
+}
+
+const signupLimiter=makeAuthLimiter("/signup");
+const loginLimiter=makeAuthLimiter("/login");
 
 router.route("/signup")
     .get(userController.renderSignupForm)
-    .post(authLimiter, wrapasync(userController.signup));
+    .post(signupLimiter, wrapasync(userController.signup));
 
 router.route("/login")
     .get(userController.renderLoginForm)
-    .post(authLimiter, userController.login);
+    .post(loginLimiter, userController.login);
 
 router.route("/logout")
     .get(userController.logout);

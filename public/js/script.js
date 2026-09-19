@@ -46,6 +46,50 @@
 })();
 
 (function(){
+    var root=document.getElementById("checkout-root");
+    if(!root) return;
+    if(root.dataset.configured!=="1") return;
+    var btn=document.getElementById("rzp-button");
+    var msg=document.getElementById("razorpay-status");
+    btn.classList.remove("d-none");
+    function failed(text){ msg.textContent=text; msg.classList.remove("d-none"); }
+    btn.addEventListener("click",function(){
+        msg.classList.add("d-none");
+        fetch("/bookings/"+root.dataset.bookingId+"/pay/order",{method:"POST"})
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if(!data.order_id){ failed("Could not create payment order."); return; }
+                var rzp=new Razorpay({
+                    key:data.key_id,
+                    amount:data.amount,
+                    currency:data.currency,
+                    name:"Wanderlust",
+                    description:root.dataset.name,
+                    order_id:data.order_id,
+                    handler:function(resp){
+                        fetch("/bookings/"+root.dataset.bookingId+"/pay/verify",{
+                            method:"POST",
+                            headers:{"Content-Type":"application/json"},
+                            body:JSON.stringify({
+                                razorpay_order_id:resp.razorpay_order_id,
+                                razorpay_payment_id:resp.razorpay_payment_id,
+                                razorpay_signature:resp.razorpay_signature
+                            })
+                        }).then(function(r){ return r.json(); })
+                          .then(function(result){
+                              if(result.ok){ window.location.href="/bookings/my"; }
+                              else{ failed("Verification failed: "+(result.error||"unknown")); }
+                          });
+                    },
+                    modal:{ ondismiss:function(){ failed("Payment window closed. No charge made."); } }
+                });
+                rzp.open();
+            })
+            .catch(function(){ failed("Could not reach the payment service."); });
+    });
+})();
+
+(function(){
     if(!document.getElementById("landing-hero")) return;
 
     function animateCounter(el){
